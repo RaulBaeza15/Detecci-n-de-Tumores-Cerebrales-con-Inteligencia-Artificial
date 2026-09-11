@@ -1,69 +1,40 @@
-🧠 Proyecto: Detección de Tumores Cerebrales con Inteligencia Artificial
+# Brain Tumor Detection with Deep Learning
 
-Este proyecto utiliza imágenes de resonancias magnéticas para entrenar un sistema que detecta automáticamente si hay presencia de tumores cerebrales. Se compone de varias fases que combinan procesamiento de imágenes, aprendizaje profundo y visualización interpretativa.
-________________________________________
-1️⃣ Descarga y preparación de datos
+Personal computer vision project that classifies brain MRI scans as tumor / no tumor, and explains its predictions with Grad-CAM heatmaps.
 
-•	Se descarga un conjunto de imágenes desde Kaggle usando kagglehub.
+The whole pipeline lives in a single script, `Tumor_detector.py`, and runs in four phases:
 
-o	Utilicé el dataset público Br35H :: Brain Tumor Detection 2020, disponible en Kaggle:
+1. **Data download and preparation**
+   - Downloads the public [Br35H :: Brain Tumor Detection 2020](https://www.kaggle.com/datasets/ahmedhamada0/brain-tumor-detection) dataset from Kaggle with `kagglehub`. Images come sorted into `yes` (tumor) and `no` (no tumor) folders.
+   - Splits the data into train / validation / test (70% / 15% / 15%).
+   - Applies data augmentation to the training set (rotation, zoom, horizontal flip) and converts images to 128x128 grayscale.
 
-📎 https://www.kaggle.com/datasets/ahmedhamada0/brain-tumor-detection
+2. **Autoencoder**
+   - A convolutional autoencoder compresses each image into a smaller latent representation and reconstructs it, forcing the model to learn the important patterns in the scans.
+   - Reconstruction samples are saved so you can visually check what the model learned.
 
-•	Las imágenes están clasificadas en dos carpetas: yes (con tumor) y no (sin tumor).
+3. **Classifier**
+   - The encoder half of the autoencoder is extracted and its latent space feeds a binary classifier (dense layers with dropout and batch normalization).
+   - Evaluation on the test set produces a confusion matrix and a classification report (precision, recall, F1), saved to `results/evaluation_report.txt`.
 
-•	Se organizan en carpetas para entrenamiento, validación y test (70%-15%-15%).
+4. **Interpretability with Grad-CAM**
+   - Grad-CAM heatmaps are generated over the encoder's last convolutional layer and overlaid on the original scans, showing which regions drove the decision. Examples are saved separately for tumor and no-tumor cases.
 
-🔧 Además, se aplican transformaciones a las imágenes para mejorar el aprendizaje del modelo:
+The repo includes sample outputs from a real run: reconstructions, autoencoder loss, classifier metrics history, a confusion matrix and Grad-CAM overlays.
 
-•	Rotaciones
+## Requirements
 
-•	Zoom
+Python with TensorFlow/Keras, scikit-learn, OpenCV, Matplotlib and `kagglehub`.
 
-•	Volteo horizontal
+## How to run
 
-Esto se llama data augmentation y ayuda a que el modelo generalice mejor.
+```bash
+pip install tensorflow scikit-learn opencv-python matplotlib kagglehub
+python Tumor_detector.py
+```
 
-________________________________________
-2️⃣ Autoencoder: comprensión de imágenes
+Note: the `BASE_DIR` constant at the top of the script points to a local path on the author's machine; change it to your own working directory before running.
 
-Se entrena un autoencoder, una red neuronal que:
+## Disclaimer
 
-•	Comprime la imagen a una representación más pequeña (llamada espacio latente).
-
-•	Reconstruye la imagen original desde esa representación.
-
-📌 ¿Por qué es útil? Porque obliga al modelo a entender los patrones importantes de las imágenes, como formas y estructuras internas del cerebro.
-
-Se guardan ejemplos visuales de reconstrucciones para comprobar que el modelo ha aprendido correctamente.
-
-________________________________________
-3️⃣ Clasificador: detección de tumores
-
-Una vez entrenado el autoencoder, se extrae su parte de compresión (el encoder) y se usa como entrada para un clasificador.
-
-Este clasificador:
-•	Toma la representación comprimida de la imagen.
-
-•	Decide si hay tumor o no.
-
-✅ Se entrena con los datos comprimidos y se evalúa con datos nuevos (test), generando:
-
-•	Una matriz de confusión (aciertos y errores)
-
-•	Un informe de clasificación con métricas como precisión y sensibilidad
-
-________________________________________
-4️⃣ Interpretabilidad: Grad-CAM
-
-Para entender por qué el modelo toma sus decisiones, se usa una técnica llamada Grad-CAM que genera mapas de calor sobre las imágenes.
-
-📸 ¿Qué muestra?
-
-•	Las zonas de la imagen que han influido más en la decisión del modelo.
-
-•	Se superpone el mapa de calor sobre la imagen original.
-
-Se generan ejemplos tanto de imágenes con tumor como sin tumor, y se guardan en carpetas separadas.
-
-
+This is an educational project. It is not a medical device and must not be used for diagnosis.
