@@ -13,12 +13,20 @@ The whole pipeline lives in a single script, `Tumor_detector.py`, and runs in fo
    - A convolutional autoencoder compresses each image into a smaller latent representation and reconstructs it, forcing the model to learn the important patterns in the scans.
    - Reconstruction samples are saved so you can visually check what the model learned.
 
+   ![Autoencoder reconstruction samples from a real run](reconstructions.png)
+
 3. **Classifier**
    - The encoder half of the autoencoder is extracted and its latent space feeds a binary classifier (dense layers with dropout and batch normalization).
    - Evaluation on the test set produces a confusion matrix and a classification report (precision, recall, F1), saved to `results/evaluation_report.txt`.
 
+   ![Classifier training and validation metrics over epochs](metrics_history.png)
+
+   ![Confusion matrix on the test set](confusion_matrix.png)
+
 4. **Interpretability with Grad-CAM**
    - Grad-CAM heatmaps are generated over the encoder's last convolutional layer and overlaid on the original scans, showing which regions drove the decision. Examples are saved separately for tumor and no-tumor cases.
+
+   ![Grad-CAM heatmaps overlaid on brain MRI scans](mapas%20de%20calor.jpg)
 
 The repo includes sample outputs from a real run: reconstructions, autoencoder loss, classifier metrics history, a confusion matrix and Grad-CAM overlays.
 
